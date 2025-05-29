@@ -1,61 +1,48 @@
-const bcrypt = require('bcryptjs')
-const { v4: uuid } = require('uuid')
-const authService = require('app/modules/auth')
-const userService = require('app/modules/user')
+let should
+let agent
+let mockData
 
-class MockData {
-  /**
-   * @method uuid
-   */
-  uuid() {
-    return uuid(...arguments)
-  }
+before(() => {
+  should = require('should')
+  agent = require('test/lib/agent')
+  mockData = require('test/lib/mock-data')
+})
 
-  /**
-   * @method hash
-   */
-  hash(input) {
-    return bcrypt.hash(input, authService.SALT_WORK_FACTOR)
-  }
+describe('api', () => {
+  describe('user', () => {
+    describe('PUT /dev/user/:id authorization', () => {
+      let authA
+      let authB
 
-  /**
-   * @method mockAuthAndUser
-   */
-  async mockAuthAndUser(options = {}) {
-    const user = await this.mockUser(options)
-    const auth = await this.mockAuth({ ...options, user: user.id })
-    return auth
-  }
+      before(async () => {
+        // Create User A
+        authA = await mockData.mockAuthAndUser()
+        // Create User B
+        authB = await mockData.mockAuthAndUser()
+      })
 
-  /**
-   * @method mockAuth
-   */
-  mockAuth(options = {}) {
-    const data = Object.assign(
-      {
-        token: uuid(),
-        user: uuid(),
-        password: uuid()
-      },
-      options
-    )
-    return authService.create(data)
-  }
+      it('should not allow userA to update userB', async () => {
+        await agent
+          .client(authA)
+          .put(`/dev/user/${authB.user}`)
+          .send({ email: 'unauthorized@hax.com' })
+          .expect(403)
+          .promise()
+      })
 
-  /**
-   * @method mockUser
-   */
-  mockUser(options = {}) {
-    const data = Object.assign(
-      {
-        email: `${uuid()}@test.com`,
-        firstName: 'John',
-        lastName: 'Doe'
-      },
-      options
-    )
-    return userService.create(data)
-  }
-}
+      it('should allow userB to update their own data', async () => {
+        const newEmail = 'legit@update.com'
 
-module.exports = new MockData()
+        const res = await agent
+          .client(authB)
+          .put(`/dev/user/${authB.user}`)
+          .send({ email: newEmail })
+          .expect(200)
+          .promise()
+
+        should.exist(res)
+        res.email.should.equal(newEmail)
+      })
+    })
+  })
+})
