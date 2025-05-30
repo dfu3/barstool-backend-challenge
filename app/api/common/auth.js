@@ -10,10 +10,8 @@ class CommonAuth {
   async requiresLogin(req) {
     const token = parseAuthToken(req)
     if (!token) throw new UnauthorizedError()
-
     const auth = await authService.findOne({ token }, '_id user')
     if (!auth) throw new UnauthorizedError()
-
     req.authId = auth.id
     req.userId = auth.user
   }

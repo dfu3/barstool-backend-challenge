@@ -10,8 +10,8 @@ module.exports = (router) => {
   })
 
   // Create a note for a user
-  router.post('/user/:userId/note', async (req, res) => {
-    await auth.requiresCurrentUser(req)
+  router.post('/note', async (req, res) => {
+    await auth.requiresLogin(req)
     await validator.create(req)
     await controller.createForUser(req, res)
   })

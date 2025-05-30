@@ -17,7 +17,7 @@ exports.readForUser = async (req, res) => {
 exports.createForUser = async (req, res) => {
   const note = await noteService.create({
     ...req.body,
-    userId: req.params.userId
+    userId: req.userId
   })
   res.status(201).send(note)
 }
