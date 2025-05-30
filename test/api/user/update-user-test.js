@@ -26,18 +26,18 @@ describe('api', () => {
           .client()
           .put(`/user/${authB.user}`)
           .set('authorization', authA.token)
-          .send({ email: 'unauthorized@hax.com' })
+          .send({ email: 'unauthorized@gmail.com' })
           .expect(403)
           .promise()
       })
 
       it('should allow userB to update their own data', async () => {
-        const newEmail = 'authorized@hax.com';
+        const newEmail = 'authorized@gmail.com';
         const res = await agent
           .client()
           .put(`/user/${authB.user}`)
           .set('authorization', authB.token)
-          .send({ email: 'authorized@hax.com' })
+          .send({ email: 'authorized@gmail.com' })
           .expect(200)
           .promise()
 
