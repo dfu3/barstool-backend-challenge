@@ -4,7 +4,7 @@ exports.currentStatus = function (req, res) {
 
   if (mdb.readyState != mdb.ReadyStates.connected) {
     return res.status(503).send({
-    status: 'DB Not Connected'
+      status: 'DB Not Connected'
     })
   }
 
